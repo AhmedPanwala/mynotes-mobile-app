@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:mynotes/firebase_options.dart';
 
-
 class RegisterView extends StatefulWidget {
   const RegisterView({super.key});
 
@@ -12,7 +11,6 @@ class RegisterView extends StatefulWidget {
 }
 
 class _RegisterViewState extends State<RegisterView> {
-
   late final TextEditingController _email;
   late final TextEditingController _password;
 
@@ -30,7 +28,7 @@ class _RegisterViewState extends State<RegisterView> {
     super.dispose();
   }
 
-   @override
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
@@ -38,7 +36,9 @@ class _RegisterViewState extends State<RegisterView> {
         backgroundColor: Colors.lightBlue,
       ),
       body: FutureBuilder(
-        future: Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform),
+        future: Firebase.initializeApp(
+          options: DefaultFirebaseOptions.currentPlatform,
+        ),
         builder: (context, asyncSnapshot) {
           return Column(
             children: [
@@ -62,31 +62,41 @@ class _RegisterViewState extends State<RegisterView> {
                 onPressed: () async {
                   final email = _email.text;
                   final password = _password.text;
-          
-                  try{
-                   final usercredential = await FirebaseAuth.instance.createUserWithEmailAndPassword(
-                    email: email,
-                    password: password,
-                  ); 
-                  print(usercredential);
+
+                  try {
+                    final usercredential = await FirebaseAuth.instance
+                        .createUserWithEmailAndPassword(
+                          email: email,
+                          password: password,
+                        );
+
+                    print(usercredential);
                   } on FirebaseAuthException catch (e) {
-                    if (e.code =="email-already-in-use") {
+                    if (e.code == "email-already-in-use") {
                       print("Email is already in the use");
                     }
-                    if (e.code=="weak-password") {
+                    if (e.code == "weak-password") {
                       print("Password is too weak");
                     }
-                    if (e.code=="invalid-email") {
+                    if (e.code == "invalid-email") {
                       print("Invalid email");
                     }
                     print(e.code);
-                  } 
+                  }
                 },
                 child: Text("Register"),
               ),
+              TextButton(
+                onPressed: () {
+                  Navigator.of(
+                    context,
+                  ).pushNamedAndRemoveUntil('/login/', (route) => false);
+                },
+                child: Text("Already Register? login here"),
+              ),
             ],
           );
-        }
+        },
       ),
     );
   }
