@@ -1,8 +1,10 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:mynotes/constants/routes.dart';
 import 'package:mynotes/firebase_options.dart';
-import 'dart:developer' as devtools show log;
+import 'package:mynotes/utilities/show_error_dialog.dart';
+
 
 class RegisterView extends StatefulWidget {
   const RegisterView({super.key});
@@ -65,24 +67,31 @@ class _RegisterViewState extends State<RegisterView> {
                   final password = _password.text;
 
                   try {
-                    final usercredential = await FirebaseAuth.instance
+                      await FirebaseAuth.instance
                         .createUserWithEmailAndPassword(
                           email: email,
                           password: password,
                         );
-
-                    devtools.log(usercredential.toString());
+                        final user = FirebaseAuth.instance.currentUser;
+                       await user?.sendEmailVerification();
+                  Navigator.of(context).pushNamed(emailVerifyRoute);
                   } on FirebaseAuthException catch (e) {
                     if (e.code == "email-already-in-use") {
-                      devtools.log("Email is already in the use");
+                     showErrorDialog(context, "Registration failed", 
+                     "Email is already registered");
                     }
-                    if (e.code == "weak-password") {
-                      devtools.log("Password is too weak");
+                    else if (e.code == "weak-password") {
+                      showErrorDialog(context, "Registration failed", 
+                     "Password is too weak");
                     }
-                    if (e.code == "invalid-email") {
-                      devtools.log("Invalid email");
+                    else if (e.code == "invalid-email") {
+                      showErrorDialog(context, "Registration failed", 
+                     "Invalid Email address");
                     }
-                    devtools.log(e.code);
+                  }
+                  catch(e){
+                    showErrorDialog(context, "Registration failed", 
+                     e.toString());
                   }
                 },
                 child: Text("Register"),
@@ -91,7 +100,7 @@ class _RegisterViewState extends State<RegisterView> {
                 onPressed: () {
                   Navigator.of(
                     context,
-                  ).pushNamedAndRemoveUntil('/login/', (route) => false);
+                  ).pushNamedAndRemoveUntil(loginRoute, (route) => false);
                 },
                 child: Text("Already Register? login here"),
               ),
